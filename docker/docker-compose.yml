@@ -1,0 +1,16 @@
+version: '3'
+services:
+  nginx:
+    build: nginx/
+    ports:
+    - 80:80
+    links:
+    - php
+  php:
+    build: fpm/
+    volumes:
+    - ../app:/var/www/html/app
+    # - ./fpm/oxy:/var/www/html/oxy
+volumes:
+  oxy:
+  app:

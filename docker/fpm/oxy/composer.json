@@ -1,0 +1,15 @@
+{
+  "require":
+  {
+    "enelar/phpa2o": "~0.1"
+  },
+  "authors":
+  [
+    {
+      "name": "Kirill Berezin",
+      "homepage": "http://exsul.net",
+      "email": "enelar@exsul.net",
+      "role": "Maintainer"
+    }
+  ]
+}
