@@ -8,9 +8,17 @@ services:
     - php
   php:
     build: fpm/
+    depends_on:
+    - composer
     volumes:
     - ../app:/var/www/html/app
+    # - ./fpm/default.php:/var/www/html
     # - ./fpm/oxy:/var/www/html/oxy
+  composer:
+    image: composer
+    volumes:
+    - ./fpm/oxy:/app
+    command: install
 volumes:
   oxy:
   app:
