@@ -24,18 +24,16 @@ function IncludeModule( $dir, $module )
   $module_file = str_replace('\\', '/', $module);
   $file = "{$dir}/{$module_file}.php";
 
-  if (stripos($file, "..") !== false)
-    return null;
-
-  if (!file_exists($file))
-    return null;
-
-  global $phoxy_loading_module;
-  $phoxy_loading_module = $module;
 
   include_once(__DIR__ . "/api.php");
   try
   {
+    phoxy_protected_assert(stripos($file, "..") === false, 'File name contains parent directory access');
+    phoxy_protected_assert(file_exists($file), 'File doesnt exists');
+
+    global $phoxy_loading_module;
+    $phoxy_loading_module = $module;
+
     global $_phoxy_loaded_classes;
 
     if (isset($_phoxy_loaded_classes[$dir][$module]))
@@ -50,10 +48,10 @@ function IncludeModule( $dir, $module )
     else
       include_once($file);
 
-    if (!class_exists($classname))
-      die('Class include failed. File do not carrying that');
+    phoxy_protected_assert(class_exists($classname), 'Class include failed. File do not carrying that');
 
     $obj = InstanceClassByName($classname, $args);
+    phoxy_protected_assert($obj, 'Failure at object create');
 
     if (!isset($_phoxy_loaded_classes[$dir]))
       $_phoxy_loaded_classes[$dir] = [];
@@ -63,11 +61,13 @@ function IncludeModule( $dir, $module )
   }
   catch (phoxy_protected_call_error $e)
   {
+    $e->result['classname'] = $module;
+    $e->result['path'] = $dir;
     throw $e;
   }
   catch (Exception $e)
   {
-    phoxy_protected_assert(false, ["error" => "Uncaught script exception at module load"]);
+    phoxy_protected_assert(false, 'Uncaught script exception at module load');
   }
 }
 

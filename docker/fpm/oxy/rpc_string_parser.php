@@ -7,11 +7,9 @@ class rpc_string_parser
     $t = $this->GetOrganizedTokens($str);
     $args = $this->ExplodeTokensToCallee($t);
     $try = $this->GetAllCallVariations($args);
-
     include_once('include.php');
 
-    if (!count($try))
-      die('Error at rpc resolve: All variations were invalid. Unable to resolve');
+    phoxy_protected_assert(count($try), 'Error at rpc resolve: All variations were invalid. Unable to resolve');
 
     foreach ($try as $t)
     {
@@ -23,17 +21,24 @@ class rpc_string_parser
       }
 
       $file_location = $target_dir.$t["scope"];
-      $obj = IncludeModule($file_location, $t["class"]);
 
-      if (!is_null($obj))
-        return
-        [
-          "original_str" => $str,
-          "obj" => $obj,
-          "method" => $t["method"],
-        ];
+      try
+      {
+        $obj = IncludeModule($file_location, $t["class"]);
+
+        if (!is_null($obj))
+          return
+          [
+            "original_str" => $str,
+            "obj" => $obj,
+            "method" => $t["method"],
+          ];
+      } catch (\phoxy_protected_call_error $e) {
+        // If it silently fails thats fine
+      }
     }
-    exit(json_encode(["error" => 'Module not found']));
+
+    phoxy_protected_assert(false, 'Module not found');
   }
 
   private function GetAllCallVariations($callee)
